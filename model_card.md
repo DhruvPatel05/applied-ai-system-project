@@ -1,111 +1,217 @@
 # 🎧 Model Card: Music Recommender Simulation
 
-## 1. Model Name  
+## 1. Model Name
 
-Give your model a short, descriptive name.  
-Example: **VibeFinder 1.0**  
+**VibeMatch 1.0**
 
----
-
-## 2. Intended Use  
-
-Describe what your recommender is designed to do and who it is for. 
-
-Prompts:  
-
-- What kind of recommendations does it generate  
-- What assumptions does it make about the user  
-- Is this for real users or classroom exploration  
+VibeMatch is a simple content-based music recommendation system that ranks songs according to a user's musical preferences.
 
 ---
 
-## 3. How the Model Works  
+## 2. Intended Use
 
-Explain your scoring approach in simple language.  
+VibeMatch is designed to recommend songs from a small music catalog based on a user's preferred genre, mood, energy level, and acoustic preference.
 
-Prompts:  
+The system assumes that these features provide a basic representation of a person's musical taste. It compares the user's preferences with the attributes of each available song and ranks the closest matches.
 
-- What features of each song are used (genre, energy, mood, etc.)  
-- What user preferences are considered  
-- How does the model turn those into a score  
-- What changes did you make from the starter logic  
+This project is designed for classroom exploration and learning. It demonstrates how data can be transformed into recommendation scores and should not be considered a production-level music recommendation system.
 
-Avoid code here. Pretend you are explaining the idea to a friend who does not program.
+The system should not be used to make important decisions about users or to assume that a person's musical taste can be completely represented by a few attributes.
 
 ---
 
-## 4. Data  
+## 3. How the Model Works
 
-Describe the dataset the model uses.  
+VibeMatch uses a weighted scoring system.
 
-Prompts:  
+Each song contains several attributes, including genre, mood, energy, tempo, valence, danceability, and acousticness. The current recommendation algorithm primarily uses genre, mood, energy, and acousticness.
 
-- How many songs are in the catalog  
-- What genres or moods are represented  
-- Did you add or remove data  
-- Are there parts of musical taste missing in the dataset  
+The user provides:
 
----
+- A favorite genre
+- A favorite mood
+- A target energy level
+- An acoustic music preference
 
-## 5. Strengths  
+The algorithm evaluates every song individually.
 
-Where does your system seem to work well  
+A song receives **2.0 points** when its genre matches the user's favorite genre and **1.0 point** when its mood matches the user's preferred mood.
 
-Prompts:  
+Energy is treated as a similarity measurement instead of an exact match. Songs with an energy level close to the user's target receive more points than songs that are farther away.
 
-- User types for which it gives reasonable results  
-- Any patterns you think your scoring captures correctly  
-- Cases where the recommendations matched your intuition  
+Acousticness is also considered. A user who prefers acoustic music receives higher matches for songs with higher acousticness, while a user who prefers less-acoustic music receives higher matches for songs with lower acousticness.
 
----
+After every song receives a score, the songs are sorted from highest to lowest score and the top results are returned.
 
-## 6. Limitations and Bias 
-
-Where the system struggles or behaves unfairly. 
-
-Prompts:  
-
-- Features it does not consider  
-- Genres or moods that are underrepresented  
-- Cases where the system overfits to one preference  
-- Ways the scoring might unintentionally favor some users  
+The system also generates explanations showing which features contributed to each recommendation.
 
 ---
 
-## 7. Evaluation  
+## 4. Data
 
-How you checked whether the recommender behaved as expected. 
+The current dataset contains **10 songs**.
 
-Prompts:  
+The catalog includes several genres:
 
-- Which user profiles you tested  
-- What you looked for in the recommendations  
-- What surprised you  
-- Any simple tests or comparisons you ran  
+- Pop
+- Lofi
+- Rock
+- Ambient
+- Jazz
+- Synthwave
+- Indie Pop
 
-No need for numeric metrics unless you created some.
+It also contains moods such as:
+
+- Happy
+- Chill
+- Intense
+- Relaxed
+- Moody
+- Focused
+
+Each song includes numerical features for energy, tempo, valence, danceability, and acousticness.
+
+The dataset is intentionally small for this classroom simulation. Because there are only 10 songs, it cannot represent the diversity of real-world music.
+
+Many genres, languages, artists, cultures, and musical styles are missing. The dataset also does not contain information such as lyrics, release year, listening history, popularity, or actual user interactions.
 
 ---
 
-## 8. Future Work  
+## 5. Strengths
 
-Ideas for how you would improve the model next.  
+The recommender works well when a user's preferences closely match songs represented in the dataset.
 
-Prompts:  
+For example, the **Deep Intense Rock** profile strongly matched `Storm Runner`. The song is categorized as rock and intense, has an energy value of 0.91 compared with the user's target of 0.90, and has low acousticness.
 
-- Additional features or preferences  
-- Better ways to explain recommendations  
-- Improving diversity among the top results  
-- Handling more complex user tastes  
+As a result, `Storm Runner` received the highest score of **4.89** for that profile.
+
+The system also successfully distinguishes between different types of listeners. A Chill Lofi profile favors lower-energy and more acoustic music, while the Deep Intense Rock profile favors high-energy and less-acoustic music.
+
+Another strength is explainability. Instead of returning only a ranking, the system explains contributions such as:
+
+- Genre match
+- Mood match
+- Energy similarity
+- Acoustic preference
+
+This makes it easier to understand why one song ranks above another.
 
 ---
 
-## 9. Personal Reflection  
+## 6. Limitations and Bias
 
-A few sentences about your experience.  
+One major limitation is the small dataset. With only 10 songs, the recommender has very few choices and cannot represent the variety available on a real music platform.
 
-Prompts:  
+The scoring system may also create a **filter bubble**. Genre receives 2.0 points, which is the largest individual categorical weight. As a result, songs from a user's existing favorite genre can receive a significant advantage. Repeatedly recommending similar music could make it harder for users to discover new genres.
 
-- What you learned about recommender systems  
-- Something unexpected or interesting you discovered  
-- How this changed the way you think about music recommendation apps  
+The model also assumes that musical taste can be represented using a small number of features. Real musical preferences are much more complicated.
+
+The system does not consider:
+
+- Listening history
+- Likes or dislikes
+- Skipped songs
+- Playlist activity
+- Lyrics
+- Language
+- Artist preferences
+- Listening context
+- Changes in taste over time
+
+The fixed scoring weights are the same for every user. One person may care much more about mood than genre, while another may care primarily about energy or artist.
+
+Because the dataset itself is limited, genres or moods with fewer songs also have fewer opportunities to appear in recommendations.
+
+---
+
+## 7. Evaluation
+
+I evaluated the system using three different user profiles:
+
+### High-Energy Pop
+
+- Favorite genre: Pop
+- Favorite mood: Happy
+- Target energy: 0.85
+- Prefers less-acoustic music
+
+This profile was designed to favor energetic and upbeat pop music.
+
+### Chill Lofi
+
+- Favorite genre: Lofi
+- Favorite mood: Chill
+- Target energy: 0.35
+- Prefers acoustic music
+
+This profile tests whether the ranking changes toward lower-energy, calmer, and more acoustic songs.
+
+### Deep Intense Rock
+
+- Favorite genre: Rock
+- Favorite mood: Intense
+- Target energy: 0.90
+- Prefers less-acoustic music
+
+This profile strongly favored `Storm Runner`.
+
+Its recommendation score was:
+
+```text
+Storm Runner - Voltline
+Score: 4.89
+Genre match: +2.0
+Mood match: +1.0
+Energy similarity: +0.99
+Less-acoustic preference: +0.90
+```
+
+`Gym Hero` ranked second with a score of **2.92**. Although its genre is pop instead of rock, its intense mood, high energy, and low acousticness still matched several parts of the user's preferences.
+
+This was an interesting result because it showed that a song can rank relatively high without matching every preference.
+
+Comparing the profiles showed that changing the user preferences changes the recommendation ranking in understandable ways. The Chill Lofi profile shifts toward calmer and more acoustic tracks, while the Deep Intense Rock profile shifts toward high-energy and less-acoustic tracks.
+
+I also ran the provided automated tests after implementing the recommendation logic.
+
+```text
+2 passed
+```
+
+This verified that the required recommender interfaces continued to behave correctly.
+
+---
+
+## 8. Future Work
+
+If I continued developing VibeMatch, I would first expand the dataset to include many more songs, genres, moods, languages, and artists.
+
+I would also allow users to control how important different features are. For example, one user could prioritize mood while another prioritizes genre.
+
+Additional improvements could include:
+
+- Learning from likes and dislikes
+- Tracking skipped songs
+- Considering listening history
+- Adding artist preferences
+- Using tempo, valence, and danceability more directly in scoring
+- Adding playlist information
+- Supporting multiple favorite genres
+- Creating different recommendation modes
+- Adding a diversity penalty to avoid recommending too many similar songs
+- Introducing some unfamiliar songs to reduce filter bubbles
+
+A larger version could also combine content-based recommendations with collaborative filtering to learn from the behavior of similar users.
+
+---
+
+## 9. Personal Reflection
+
+This project helped me understand that a recommendation system does not necessarily need a complicated machine learning model to produce results that feel personalized. Even a simple weighted scoring algorithm can transform user preferences into meaningful rankings.
+
+The most interesting part for me was seeing how individual weights affected the results. `Storm Runner` ranking first for the Deep Intense Rock profile made sense when I looked at each part of its score. At the same time, seeing `Gym Hero` rank second showed that recommendations can emerge from combinations of partially matching features rather than one perfect match.
+
+AI tools helped me brainstorm the scoring approach, debug import and data-loading problems, and think about possible biases in the system. I still needed to verify the suggestions by running the code, checking the dataset, comparing the rankings with my expectations, and running the automated tests.
+
+This project changed how I think about recommendation apps. A recommendation can appear intelligent to a user even though it may be produced by relatively simple rules underneath. It also showed me why the choice of features, weights, and training or catalog data matters: those design decisions directly influence what users see and what they may never discover.
