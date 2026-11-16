@@ -1,0 +1,23 @@
+flowchart TD
+    A[User Preferences] --> B[Input Validation]
+    B --> C{Preferences Valid?}
+
+    C -->|Yes| D[Music Recommendation Engine]
+    C -->|Warnings| E[Reliability Warning]
+    E --> D
+
+    D --> F[Song Dataset]
+    F --> D
+
+    D --> G[Scoring and Ranking]
+    G --> H[Top 5 Recommendations]
+
+    H --> I[Reliability Assessment]
+    I --> J[Confidence Level]
+
+    J --> K[Final Output]
+    H --> K
+
+    K --> L[Recommended Songs]
+    K --> M[Explanation]
+    K --> N[Confidence and Reliability Note]
