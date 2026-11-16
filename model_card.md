@@ -511,3 +511,50 @@ The most important lesson was that a confidence label needs context. Simply disp
 AI tools helped me brainstorm reliability approaches, debug Python import and integration issues, design test cases, and improve documentation. I still verified the suggestions by running the application, inspecting outputs, fixing errors, and running the automated test suite.
 
 The project reinforced that responsible AI engineering includes not only the model or algorithm, but also validation, testing, explainability, failure handling, documentation, and honest communication of limitations.
+
+
+## 16. Required Responsible AI Reflection
+
+### What are the limitations or biases in my system?
+
+The largest limitation is the small dataset of only 10 songs. It cannot represent the diversity of real-world music across genres, languages, cultures, artists, and listening contexts.
+
+The fixed scoring weights can also introduce bias. Genre receives a relatively large weight, so the system may repeatedly favor music similar to a user's existing preferences. This could contribute to a filter-bubble effect and reduce discovery of unfamiliar music.
+
+The confidence score is another limitation. High, Medium, and Low confidence are based on manually defined recommendation-score thresholds rather than probabilities calibrated using real user feedback.
+
+### Could the system be misused, and how would I prevent that?
+
+VibeMatch is a low-stakes music recommendation system, but its outputs could still be misinterpreted. For example, a user could interpret "High confidence" as meaning the system knows with certainty that they will enjoy a song.
+
+To reduce this risk, the application explicitly states that confidence is estimated from the internal matching score and is not a probability of user satisfaction.
+
+I would also avoid using this system to infer sensitive information about a person from their music preferences. A production version should minimize unnecessary personal data collection and clearly explain what information is used for recommendations.
+
+### What surprised me while testing reliability?
+
+One thing that surprised me was how easily a confidence label could appear more authoritative than it actually is.
+
+A recommendation such as `Storm Runner` can receive a very strong score of 4.89 because several predefined features match. However, that does not prove that the user will actually like the song.
+
+This made me realize that reliability engineering is not only about detecting crashes or invalid inputs. It also involves communicating what a metric actually means so users do not place more trust in it than the evidence supports.
+
+I also found that edge-case testing was valuable. Testing invalid energy values, unsupported moods and genres, and empty recommendation lists helped identify situations that normal recommendation examples would not reveal.
+
+### How did I collaborate with AI?
+
+I used AI as a development assistant while evolving my original Music Recommender Simulation into this applied AI system.
+
+AI helped me brainstorm the reliability layer, troubleshoot Python import errors, design edge-case tests, improve documentation, and think through responsible-AI limitations.
+
+One suggestion I **accepted** was adding a separate `reliability.py` module. I liked this approach because it kept validation and confidence assessment separate from the recommendation algorithm and made the system easier to test and understand.
+
+One AI suggestion I **changed rather than accepting as written** involved the first version of the reliability summary. The suggested implementation assumed recommendations were dictionaries and attempted to access a score using `.get("score")`. My existing recommender actually returns tuples in the form `(song, score, explanation)`. When I tested the integration, it produced an `AttributeError`.
+
+I revised the implementation to use the existing tuple structure:
+
+```python
+top_score = float(recommendations[0][1])
+```
+
+This experience reinforced that AI-generated code should not be accepted automatically. I needed to understand my existing system, run the code, inspect the error, and verify the corrected implementation myself.
