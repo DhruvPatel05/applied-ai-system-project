@@ -7,6 +7,7 @@ how different preferences affect recommendation rankings.
 
 from src.recommender import load_songs, recommend_songs
 
+from src.reliability import validate_preferences, reliability_summary
 
 def print_recommendations(profile_name, user_prefs, songs):
     """Print the top five recommendations for one user profile."""
@@ -16,6 +17,25 @@ def print_recommendations(profile_name, user_prefs, songs):
     print("=" * 65)
 
     recommendations = recommend_songs(user_prefs, songs, k=5)
+    # Validate user preferences before evaluating recommendations
+    is_valid, warnings = validate_preferences(user_prefs)
+
+    if warnings:
+        print("\nReliability Warnings:")
+        for warning in warnings:
+            print(f"  - {warning}")
+
+    # Evaluate recommendation reliability
+    summary = reliability_summary(recommendations)
+
+    print("\nRELIABILITY CHECK")
+    print(f"Status: {summary['status']}")
+    print(f"Confidence: {summary['confidence']}")
+
+    if "top_score" in summary:
+        print(f"Top recommendation score: {summary['top_score']}")
+
+    print(f"Note: {summary['message']}")
 
     for index, rec in enumerate(recommendations, start=1):
         song, score, explanation = rec
