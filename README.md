@@ -1,239 +1,414 @@
-# 🎵 Music Recommender Simulation
+# Reliable AI Music Recommendation System
 
-## Project Summary
+An applied AI system that recommends songs based on user preferences while also providing explainable scoring, input validation, and a reliability assessment.
 
-This project is a simple content-based music recommendation system built in Python. It compares a user's music preferences with song attributes and calculates a weighted score for every song in the dataset.
+This project evolves my earlier **Music Recommender Simulation** into a more complete and reliable AI system. The original recommendation engine ranked songs based on user preferences. The upgraded system adds validation, confidence assessment, reliability warnings, testing, and system-level documentation.
 
-My recommender considers genre, mood, energy, and acousticness when ranking songs. Instead of only returning recommendations, the system also explains why each song received its score. This makes it easier to understand how user preferences are transformed into ranked recommendations.
+## Project Overview
 
----
+Music recommendation systems can provide useful personalized results, but users should also understand why a recommendation was made and how much confidence they should place in it.
 
-## How The System Works
+This project combines:
 
-The system uses information about each song and compares it with a user's taste profile.
+- User preference processing
+- Song recommendation and ranking
+- Explainable recommendation scores
+- Input validation
+- Reliability checks
+- Confidence labels
+- Automated testing
 
-### Song Features
+The goal is not only to recommend songs but also to make the recommendation process more transparent and reliable.
 
-Each `Song` contains:
+## Key Features
 
-- Title
-- Artist
+### Personalized Recommendations
+
+The system recommends the top five songs based on preferences such as:
+
 - Genre
 - Mood
 - Energy
-- Tempo (BPM)
-- Valence
-- Danceability
-- Acousticness
+- Acoustic preference
 
-### User Profile
+### Explainable Recommendations
 
-A `UserProfile` stores:
+Each recommendation includes an explanation describing why the song received its score.
 
-- Favorite genre
-- Favorite mood
-- Target energy level
-- Acoustic music preference
+Example:
 
-### Algorithm Recipe
+```text
+Storm Runner - Voltline
+Genre: rock | Mood: intense
+Score: 4.89
 
-Each song receives a score based on how closely it matches the user's preferences.
+Because:
+genre match (+2.0),
+mood match (+1.0),
+energy similarity (+0.99),
+less-acoustic preference (+0.90)
+```
 
-- **+2.0 points** for a matching genre
-- **+1.0 point** for a matching mood
-- **Energy similarity points** based on how close the song's energy is to the user's target energy
-- **Acoustic preference points** based on whether the user prefers acoustic or less-acoustic music
+### Input Validation
 
-The energy score is calculated by measuring the difference between the song's energy and the user's target energy. A smaller difference produces a higher score.
+Before assessing the recommendation results, the reliability layer validates supported user preference values.
 
-The recommender calculates a score for every song, sorts the songs from highest score to lowest score, and returns the top `k` recommendations.
+It checks for:
 
-### Data Flow
+- Unknown moods
+- Unknown genres
+- Invalid energy values
+- Non-numeric energy values
+- Incorrect preference input types
+
+Invalid or unusual preferences generate warnings so that unreliable inputs are not silently accepted.
+
+### Reliability Assessment
+
+The system evaluates the score of the highest-ranked recommendation and converts it into an interpretable confidence level.
+
+| Top Score | Confidence |
+|---|---|
+| 2.5 or higher | High |
+| 1.5–2.49 | Medium |
+| Below 1.5 | Low |
+
+The confidence label is a system heuristic based on the recommendation matching score.
+
+**Important:** It is not a probability that the user will like the song.
+
+### Graceful Failure Handling
+
+If the system cannot generate recommendations, the reliability layer returns:
+
+```text
+Status: No recommendations
+Confidence: Low
+```
+
+instead of presenting an empty result as a successful recommendation.
+
+## System Architecture
+
+The system follows this workflow:
 
 ```text
 User Preferences
-      ↓
-Load Song Dataset
-      ↓
-Score Every Song
-      ↓
-Genre + Mood + Energy + Acousticness
-      ↓
-Sort by Score
-      ↓
-Return Top K Recommendations
+       |
+       v
+Input Validation
+       |
+       v
+Preference Check
+       |
+       v
+Music Recommendation Engine
+       |
+       v
+Song Dataset
+       |
+       v
+Scoring and Ranking
+       |
+       v
+Top 5 Recommendations
+       |
+       v
+Reliability Assessment
+       |
+       v
+Confidence Level
+       |
+       v
+Final Output
 ```
 
-This is a simplified content-based recommender. Real platforms such as Spotify and YouTube can combine content information with listening behavior, interactions, and information from many users.
+The Mermaid source for the full architecture is available at:
 
----
-
-## Getting Started
-
-### Setup
-
-1. Create a virtual environment:
-
-```bash
-python3 -m venv .venv
+```text
+diagrams/architecture.mmd
 ```
 
-2. Activate the environment on macOS/Linux:
+## Project Structure
 
-```bash
-source .venv/bin/activate
+```text
+applied-ai-system-project/
+|
+|-- assets/
+|
+|-- data/
+|   `-- songs.csv
+|
+|-- diagrams/
+|   `-- architecture.mmd
+|
+|-- src/
+|   |-- main.py
+|   |-- recommender.py
+|   `-- reliability.py
+|
+|-- tests/
+|   |-- test_recommender.py
+|   `-- test_reliability.py
+|
+|-- ai_interactions.md
+|-- model_card.md
+|-- README.md
+|-- requirements.txt
+`-- .gitignore
 ```
 
-On Windows:
+## How the System Works
 
-```bash
-.venv\Scripts\activate
+### 1. Load Data
+
+The system loads song information from:
+
+```text
+data/songs.csv
 ```
 
-3. Install dependencies:
+### 2. Process User Preferences
 
-```bash
-pip install -r requirements.txt
+Different user profiles contain preferences such as genre, mood, energy level, and acoustic preference.
+
+### 3. Validate Preferences
+
+`src/reliability.py` examines preference values and produces warnings when inputs fall outside the expected ranges or supported categories.
+
+### 4. Score Songs
+
+The recommendation engine compares each song against the user's preferences.
+
+Matching characteristics contribute to the recommendation score.
+
+### 5. Rank Recommendations
+
+Songs are ranked according to their total scores, and the top five are returned.
+
+### 6. Explain Results
+
+The system displays the factors that contributed to each recommendation.
+
+### 7. Assess Reliability
+
+The top recommendation score is passed through the reliability layer and assigned a confidence level of:
+
+```text
+High
+Medium
+Low
 ```
 
-4. Run the recommender:
+## Example Run
+
+Run:
 
 ```bash
 python -m src.main
 ```
 
-### Running Tests
-
-Run the tests with:
-
-```bash
-python -m pytest
-```
-
-Current test result:
+Example output:
 
 ```text
-2 passed
-```
+PROFILE: High-Energy Pop
 
----
+RELIABILITY CHECK
+Status: Success
+Confidence: High
+Top recommendation score: 4.89
 
-## Sample Recommendation Output
-
-The recommender was evaluated with multiple user profiles.
-
-### Deep Intense Rock
-
-```text
-PROFILE: Deep Intense Rock
+Note: Confidence is estimated from the recommendation matching score.
+It is not a probability of user satisfaction.
 
 1. Storm Runner - Voltline
-   Genre: rock | Mood: intense
-   Score: 4.89
-   Because: genre match (+2.0), mood match (+1.0),
-   energy similarity (+0.99), less-acoustic preference (+0.90)
+Genre: rock | Mood: intense
+Score: 4.89
+Because: genre match (+2.0), mood match (+1.0),
+energy similarity (+0.99), less-acoustic preference (+0.90)
 
 2. Gym Hero - Max Pulse
-   Genre: pop | Mood: intense
-   Score: 2.92
-   Because: mood match (+1.0), energy similarity (+0.97),
-   less-acoustic preference (+0.95)
+Genre: pop | Mood: intense
+Score: 2.92
 
 3. Sunrise City - Neon Echo
-   Genre: pop | Mood: happy
-   Score: 1.74
-   Because: energy similarity (+0.92),
-   less-acoustic preference (+0.82)
-
-4. Night Drive Loop - Neon Echo
-   Genre: synthwave | Mood: moody
-   Score: 1.63
-   Because: energy similarity (+0.85),
-   less-acoustic preference (+0.78)
-
-5. Rooftop Lights - Indigo Parade
-   Genre: indie pop | Mood: happy
-   Score: 1.51
-   Because: energy similarity (+0.86),
-   less-acoustic preference (+0.65)
+Genre: pop | Mood: happy
+Score: 1.74
 ```
 
-The system correctly ranked `Storm Runner` first because it matches the user's preferred genre and mood, has almost exactly the requested energy level, and is highly non-acoustic.
+Exact recommendations depend on the selected profile and dataset.
 
----
+## Reliability Examples
 
-## Evaluation Profiles
+### Example 1 — Valid Input
 
-I tested the recommender with three different user profiles.
+```python
+{
+    "mood": "happy",
+    "genre": "pop",
+    "energy": 0.8
+}
+```
 
-### High-Energy Pop
+Result:
 
-Preferences:
+```text
+Input validation: Passed
+```
 
-- Genre: Pop
-- Mood: Happy
-- Target Energy: 0.85
-- Prefers less-acoustic music
+### Example 2 — Invalid Energy
 
-This profile is designed to favor energetic pop songs. `Sunrise City` is a strong match because its genre and mood both match and its energy level is close to the user's target.
+```python
+{
+    "mood": "happy",
+    "genre": "pop",
+    "energy": 1.5
+}
+```
 
-### Chill Lofi
+Result:
 
-Preferences:
+```text
+Reliability Warning:
+Energy must be between 0 and 1.
+```
 
-- Genre: Lofi
-- Mood: Chill
-- Target Energy: 0.35
-- Prefers acoustic music
+### Example 3 — Unknown Preferences
 
-This profile shifts the rankings toward lower-energy and more acoustic tracks. Songs such as `Library Rain` and `Midnight Coding` have characteristics that fit this profile well.
+```python
+{
+    "mood": "super-excited",
+    "genre": "space-music",
+    "energy": 0.5
+}
+```
 
-### Deep Intense Rock
+The system identifies the unsupported mood and genre and generates reliability warnings.
 
-Preferences:
+## Installation
 
-- Genre: Rock
-- Mood: Intense
-- Target Energy: 0.90
-- Prefers less-acoustic music
+Clone the repository:
 
-`Storm Runner` ranked first for this profile with a score of 4.89. This result makes sense because it is rock, intense, has an energy value of 0.91, and has very low acousticness.
+```bash
+git clone https://github.com/DhruvPatel05/applied-ai-system-project.git
+cd applied-ai-system-project
+```
 
-The different results demonstrate that changing the user preferences changes the ranking instead of producing the same recommendations for every user.
+Create a virtual environment:
 
----
+```bash
+python3 -m venv .venv
+```
 
-## Experiments You Tried
+Activate it on macOS/Linux:
 
-I compared recommendation results across three very different taste profiles: High-Energy Pop, Chill Lofi, and Deep Intense Rock.
+```bash
+source .venv/bin/activate
+```
 
-The experiment showed that genre has a strong influence because an exact genre match contributes 2.0 points. Mood contributes another 1.0 point, while energy and acousticness help distinguish songs that otherwise have similar categorical matches.
+Install dependencies:
 
-One interesting result was `Gym Hero` for the Deep Intense Rock profile. Although it is a pop song rather than rock, it ranked second because its intense mood, 0.93 energy level, and very low acousticness strongly matched the other user preferences.
+```bash
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
 
-This demonstrated that a song does not necessarily need to match every feature to receive a relatively high recommendation score.
+## Running the System
 
----
+From the project root:
 
-## Limitations and Risks
+```bash
+python -m src.main
+```
 
-This recommender has several limitations.
+## Running Tests
 
-- The dataset currently contains only 10 songs, so the recommendation choices are limited.
-- Genre receives a relatively large weight, which may cause the system to repeatedly recommend songs from a user's existing favorite genre.
-- The system does not learn from actual user behavior such as likes, skips, listening time, or playlist additions.
-- It does not understand lyrics, language, artist similarity, or the context in which someone is listening.
-- The fixed scoring weights may not represent every user's definition of a good recommendation.
-- Content-based recommendations can create a filter bubble by repeatedly favoring music similar to preferences the user already provided.
+Run:
 
-A larger real-world system would need more diverse data and feedback signals to balance relevance with discovery.
+```bash
+python -m pytest -q
+```
 
----
+Current test suite:
 
-## Reflection
+```text
+8 passed
+```
 
-One of my biggest learning moments in this project was seeing how a relatively simple mathematical scoring system can produce recommendations that feel personalized. The program does not actually understand music like a person does. Instead, it converts preferences such as genre, mood, energy, and acousticness into numbers and uses those numbers to rank songs. Seeing `Storm Runner` rank first for the Deep Intense Rock profile helped me understand how individual feature weights directly affect the final prediction.
+The tests cover both the original recommendation logic and the new reliability layer.
 
-AI tools helped me think through the scoring logic, debug Python import issues, and organize the recommendation explanations. However, I still needed to run the program and tests myself and compare the results with the original dataset. This was important because code that looks reasonable can still behave differently than expected when tested with real data. If I continued developing this project, I would expand the dataset, incorporate user interactions such as likes and skips, experiment with different scoring weights, and add a diversity mechanism so recommendations introduce users to new genres instead of only reinforcing their existing preferences.
+Reliability tests include:
 
-For a more detailed discussion of the system, evaluation, intended use, and limitations, see the [Model Card](model_card.md).
+- Valid preferences
+- Invalid energy ranges
+- Unknown mood and genre values
+- High, medium, and low confidence levels
+- Successful reliability summaries
+- Empty recommendation handling
+
+## Reliability and Limitations
+
+The reliability layer improves transparency but does not guarantee that a user will enjoy a recommendation.
+
+Current limitations include:
+
+- The dataset is small.
+- Preferences are represented using predefined features.
+- Confidence is based on recommendation scores rather than calibrated probabilities.
+- The system does not learn from real user feedback.
+- Musical preferences are subjective and may change over time.
+- Unsupported genres or moods may reduce recommendation quality.
+- The system does not currently use large-scale behavioral listening history.
+
+Therefore, the confidence label should be interpreted as an indication of how strongly a song matches the configured preference rules, not as certainty about user satisfaction.
+
+## Testing Strategy
+
+The project uses automated tests to verify both recommendation behavior and reliability behavior.
+
+The reliability tests intentionally include edge cases such as:
+
+```text
+energy = 1.5
+unknown genre
+unknown mood
+empty recommendation list
+```
+
+These tests help ensure that unusual inputs are handled predictably instead of silently producing misleading results.
+
+## Future Improvements
+
+Potential improvements include:
+
+- Larger real-world music datasets
+- User feedback collection
+- Collaborative filtering
+- Embedding-based semantic similarity
+- Learned recommendation models
+- Calibrated confidence scores
+- More detailed uncertainty estimates
+- Interactive Streamlit interface
+- Spotify or another music API integration
+
+## Responsible AI Considerations
+
+Recommendation systems can influence what users discover and consume.
+
+This system attempts to improve responsible AI behavior by:
+
+- Explaining why recommendations were generated
+- Identifying unsupported inputs
+- Reporting uncertainty through confidence labels
+- Explicitly stating that confidence is not a probability of satisfaction
+- Handling empty results gracefully
+- Testing known failure and edge cases
+
+The system should be treated as a recommendation aid rather than an authoritative predictor of a person's musical preferences.
+
+## Author
+
+**Dhruv Patel**
+
+AI110 — Foundations of AI Engineering  
+Applied AI System Project
