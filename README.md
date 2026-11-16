@@ -412,3 +412,133 @@ The system should be treated as a recommendation aid rather than an authoritativ
 
 AI110 — Foundations of AI Engineering  
 Applied AI System Project
+
+## End-to-End Examples
+
+The following examples demonstrate how the complete system behaves from user preferences through recommendation generation and reliability assessment.
+
+### Example 1 — High-Energy Pop
+
+**Input preferences:**
+
+```python
+{
+    "genre": "pop",
+    "mood": "happy",
+    "energy": 0.85,
+    "acoustic": False
+}
+```
+
+**Example output:**
+
+```text
+RELIABILITY CHECK
+Status: Success
+Confidence: High
+Top recommendation score: 4.89
+
+1. Storm Runner - Voltline
+Score: 4.89
+
+2. Gym Hero - Max Pulse
+Score: 2.92
+
+3. Sunrise City - Neon Echo
+Score: 1.74
+```
+
+The system generates ranked recommendations, explanations for the scores, and a reliability assessment.
+
+### Example 2 — Invalid Energy Input
+
+**Input:**
+
+```python
+{
+    "genre": "pop",
+    "mood": "happy",
+    "energy": 1.5
+}
+```
+
+**Reliability output:**
+
+```text
+Reliability Warnings:
+- Energy must be between 0 and 1.
+```
+
+This demonstrates the system's ability to identify an input outside the expected range.
+
+### Example 3 — Unsupported Preferences
+
+**Input:**
+
+```python
+{
+    "genre": "space-music",
+    "mood": "super-excited",
+    "energy": 0.5
+}
+```
+
+**Reliability output:**
+
+```text
+Reliability Warnings:
+- Unknown mood 'super-excited'. Recommendation quality may be lower.
+- Unknown genre 'space-music'. Recommendation quality may be lower.
+```
+
+This demonstrates graceful handling of preference categories that are not represented by the system.
+
+## Design Decisions
+
+### Why I Extended the Existing Recommendation Engine
+
+Instead of replacing the original Music Recommender Simulation, I kept its working scoring and ranking logic and built a reliability layer around it.
+
+This allowed me to focus on making the complete AI system safer, more transparent, and easier to evaluate.
+
+### Separate Reliability Module
+
+Reliability logic is located in:
+
+```text
+src/reliability.py
+```
+
+I separated this functionality from `recommender.py` so recommendation logic and reliability logic have clear responsibilities and can be tested independently.
+
+### Explainability
+
+I kept the recommendation explanations because a score alone does not tell a user why a song was selected.
+
+The system exposes factors such as genre match, mood match, energy similarity, and acoustic preference.
+
+### Confidence Labels
+
+I chose simple High, Medium, and Low labels to make recommendation strength understandable.
+
+However, the application explicitly explains that these labels are derived from matching scores and are not probabilities of user satisfaction.
+
+### Testing Edge Cases
+
+In addition to testing normal recommendations, I added tests for invalid energy values, unsupported preferences, different confidence levels, and empty recommendation results.
+
+These cases help evaluate system behavior outside the normal successful path.
+
+## Project Reflection
+
+The original version of this project focused mainly on producing ranked music recommendations. Building the applied AI system made me think beyond the core algorithm.
+
+I learned that a useful AI system also needs validation, testing, explainability, failure handling, and clear communication about uncertainty.
+
+One of the most important lessons was that reliability metrics can themselves be misleading if they are not explained. A "High" confidence result sounds authoritative, even though my confidence value is only based on internal matching rules. I therefore added an explicit message explaining that confidence is not a probability that the user will enjoy a song.
+
+I also encountered integration problems while adding the reliability layer. An early implementation assumed recommendation results were dictionaries, while my existing recommender returned tuples. Running the system exposed the error, and I updated the implementation to work with the actual interface.
+
+This reinforced the importance of testing AI-assisted code rather than assuming generated suggestions are correct.
+
+Overall, the project evolved from a simple recommendation algorithm into a more complete applied AI system with recommendation logic, explanations, validation, reliability assessment, automated tests, architecture documentation, and responsible-AI considerations.
